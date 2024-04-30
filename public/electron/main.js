@@ -9,7 +9,7 @@ const log = require("electron-log");
 const _ = require("lodash");
 
 // TODO @brown-ccv #340: Use Electron's web serial API (remove event-marker dependency)
-const { getPort, sendToPort } = require("event-marker");
+//const { getPort, sendToPort } = require("event-marker");
 
 // Early exit when installing on Windows: https://www.electronforge.io/config/makers/squirrel.windows#handling-startup-events
 if (require("electron-squirrel-startup")) app.quit();
@@ -29,14 +29,12 @@ const GIT_VERSION = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../versi
 const ELECTRON_START_URL = process.env.ELECTRON_START_URL;
 
 let CONFIG; // Honeycomb configuration object
-let CONTINUE_ANYWAY; // Whether to continue the experiment with no hardware connected (option is only available in dev mode)
 
 let TEMP_FILE; // Path to the temporary output file
 let OUT_PATH; // Path to the final output folder (on the Desktop)
 let OUT_FILE; // Name of the final output file
-
-let TRIGGER_CODES; // Trigger codes and IDs for the EEG machine
-let TRIGGER_PORT; // Port that the EEG machine is talking through
+let CSV_FILE; // Name of CSV version of output -- CELS
+let trial_offset = 0; // CELS -- given our multiple phases, we need to know what jsPsych trial num really was the start of the data.
 
 /************ APP LIFECYCLE ***********/
 
@@ -50,13 +48,10 @@ app.whenReady().then(() => {
 
   // Handle ipcRenderer events (on is renderer -> main, handle is renderer <--> main)
   ipcMain.on("setConfig", handleSetConfig);
-  ipcMain.on("setTrigger", handleSetTrigger);
   ipcMain.handle("getCredentials", handleGetCredentials);
   ipcMain.on("onDataUpdate", handleOnDataUpdate);
   ipcMain.handle("onFinish", handleOnFinish);
-  ipcMain.on("photodiodeTrigger", handlePhotodiodeTrigger);
   ipcMain.on("saveVideo", handleSaveVideo);
-  ipcMain.handle("checkSerialPort", handleCheckSerialPort);
 
   // Create the Electron window
   createWindow();
@@ -105,6 +100,90 @@ process.on("uncaughtException", (error) => {
   app.quit();
 });
 
+/************ LOCAL BITS ************* */
+/*
+// INCREMENTAL FILE SAVING // 3.2.x code, modified
+let stream = false;
+let fileCreated = false;
+let preSavePath = "";
+let stream_csv = false;
+let preSavePath_csv = "";
+let savePath = "";
+let participantID = "";
+let studyID = "";
+//const images = [];
+let startTrial = -1;
+const today = new Date();
+let trial_offset = 0;
+
+const getSavePath = (studyID, participantID) => {  // 3.2.x code, modified
+  if (studyID !== "" && participantID !== "") {
+    const desktop = app.getPath("desktop");
+    const name = app.getName();
+    const date = today.toISOString().slice(0, 10);
+    // 7/10/23 (AGH) ADDED: This section was added for the omst to ensure that data was saved on the first iteration of a studyID and participant ID
+    const folderPath = path.join(desktop, studyID, participantID, date, name);
+
+    // Create the folders if they don't exist
+    fs.mkdirSync(path.join(desktop, studyID), { recursive: true });
+    fs.mkdirSync(path.join(desktop, studyID, participantID), { recursive: true });
+    fs.mkdirSync(path.join(desktop, studyID, participantID, date), { recursive: true });
+
+    return folderPath;
+    // END OF ADDED SECTION
+  }
+};
+
+const getFullPath = (fileName) => { // 3.2.x code
+  return path.join(savePath, fileName);
+};
+
+
+// 7/10/23 (AGH) ADDED: this function was added to allow the application to save data if the window is
+// closed before the completion of the experiment
+const saveDataAndQuit = () => { // 3.2.x code, modified
+  const dcode = today.getTime();
+  if (stream) {
+    stream.end("]");
+    stream.on("finish", () => {
+      if (preSavePath && savePath) {
+        const filename = `pid_${participantID}_${dcode}.json`; // Generate a unique filename using the current timestamp
+        const fullPath = getFullPath(filename); // Set the full path for the data file
+        // Ensure that the savePath directory exists before moving the file
+        fsExtra.ensureDirSync(savePath); //7/24/23 (AGH) ADDED
+        //console.log('JSON move',preSavePath,savePath)
+        try {
+          fsExtra.copySync(preSavePath, fullPath);
+          //console.log('JSON copied');
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    });
+  }
+  if (stream_csv) {
+    // CELS - added
+    stream_csv.end("\n");
+    stream_csv.on("finish", () => {
+      if (preSavePath_csv && savePath) {
+        const filename = `pid_${participantID}_${dcode}.csv`; // Generate a unique filename using the current timestamp
+        const fullPath = getFullPath(filename); // Set the full path for the data file
+        // Ensure that the savePath directory exists before moving the file
+        fsExtra.ensureDirSync(savePath); //7/24/23 (AGH) ADDED
+        //console.log('CSV move',preSavePath_csv,savePath)
+        try {
+          fsExtra.copySync(preSavePath_csv, fullPath);
+          //console.log('CSV copied');
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    });
+  }
+  app.quit(); // Quit the app - either we flushed it all or no stream available
+};
+*/
+
 /*********** RENDERER EVENT HANDLERS ***********/
 
 /**
@@ -118,20 +197,6 @@ function handleSetConfig(event, config) {
 }
 
 /**
- * Receives the Honeycomb config settings and passes them to the CONFIG global in this file
- * @param {Event} event The Electron renderer event
- * @param {Object} trigger The metadata for the event code trigger
- * @param {string} trigger.comName The COM name of the serial port
- * @param {Object} trigger.eventCodes The list of possible event codes to be triggered
- * @param {string} trigger.productID The name of the product connected to the serial port
- * @param {string} trigger.vendorID The name of the vendor connected to the serial prot
- */
-function handleSetTrigger(event, trigger) {
-  TRIGGER_CODES = trigger;
-  log.info("Trigger Codes: ", TRIGGER_CODES);
-}
-
-/**
  * Checks for REACT_APP_STUDY_ID and REACT_APP_PARTICIPANT_ID environment variables
  * Note that studyID and participantID are undefined when the environment variables are not given
  * @returns An object containing a studyID and participantID
@@ -142,27 +207,6 @@ function handleGetCredentials() {
   if (studyID) log.info("Received study from ENV: ", studyID);
   if (participantID) log.info("Received participant from ENV: ", participantID);
   return { studyID, participantID };
-}
-
-/**
- * @returns {Boolean} Whether or not the EEG machine is connected to the computer
- */
-function handleCheckSerialPort() {
-  setUpPort().then(() => handleEventSend(TRIGGER_CODES.eventCodes.test_connect));
-}
-
-/**
- * Sends the event_codes to the trigger port
- * @param {} event The serial port event
- * @param {number} code The event code to be recorded
- */
-function handlePhotodiodeTrigger(event, code) {
-  if (code !== undefined) {
-    log.info(`Event: ${_.invert(TRIGGER_CODES.eventCodes)[code]}, code: ${code}`);
-    handleEventSend(code);
-  } else {
-    log.warn("Photodiode event triggered but no code was sent");
-  }
 }
 
 /**
@@ -181,6 +225,138 @@ function handleOnDataUpdate(event, data) {
     OUT_PATH = path.resolve(app.getPath("desktop"), app.getName(), study_id, participant_id);
     // TODO @brown-ccv #307: ISO 8061 data string? Doesn't include the punctuation
     OUT_FILE = `${start_date}.json`.replaceAll(":", "_"); // (":" are replaced to prevent issues with invalid file names);
+  }
+  if (!CSV_FILE) {
+    // CELS
+    // This file holds a simpler representation of the data.  We also stream this much like the TEMP_FILE as I'm paranoid
+    // If we don't have it already, make the folder / file and add the header info
+    const csvPath = path.resolve(app.getPath("desktop"), app.getName(), study_id, participant_id);
+    fs.mkdirSync(csvPath, { recursive: true });
+    CSV_FILE = path.resolve(csvPath, OUT_FILE.replaceAll(".json", ".csv"));
+
+    // Write useful header info
+    fs.appendFileSync(CSV_FILE, "Start: " + data.login_data.start_date + "\n");
+    fs.appendFileSync(CSV_FILE, "Resp mode: " + data.login_data.respmode + "\n");
+    fs.appendFileSync(CSV_FILE, "Two-choice mode: " + data.login_data.twochoice + "\n");
+    fs.appendFileSync(CSV_FILE, "Self-paced mode: " + data.login_data.selfpaced + "\n");
+    fs.appendFileSync(
+      CSV_FILE,
+      "Set.Subset: " + `${data.login_data.stimset}.${data.login_data.sublist}` + "\n"
+    );
+    fs.appendFileSync(CSV_FILE, "Language: " + data.login_data.language + "\n");
+    fs.appendFileSync(CSV_FILE, "Consent included: " + data.login_data.include_consent + "\n");
+    fs.appendFileSync(CSV_FILE, "Demographics included: " + data.login_data.include_demog + "\n");
+    fs.appendFileSync(
+      CSV_FILE,
+      "Perceptual control included: " + data.login_data.include_pcon + "\n"
+    );
+    fs.appendFileSync(CSV_FILE, "Instructions included: " + data.login_data.include_instr + "\n");
+    fs.appendFileSync(CSV_FILE, "\n");
+  }
+  if (CSV_FILE) {
+    // CELS - should be open/exist by now
+    // format the output here based on the task
+    if (data.task == "consent") {
+      fs.appendFileSync(CSV_FILE, "Consent\n");
+      if (data.response == 0) {
+        fs.appendFileSync(CSV_FILE, "Yes\n");
+      } else {
+        fs.appendFileSync(CSV_FILE, "No");
+      }
+      fs.appendFileSync(CSV_FILE, "\n");
+    } else if (data.task == "demographics") {
+      fs.appendFileSync(CSV_FILE, "Name, DOB, Gender, Ethnicity, Race\n");
+      fs.appendFileSync(
+        CSV_FILE,
+        data.response.fullname +
+          ", " +
+          data.response.dob +
+          ", " +
+          data.response.gender +
+          ", " +
+          data.response.ethnicity +
+          ", " +
+          data.response.race +
+          "\n"
+      );
+    } else if (data.trial_type == "preload") {
+      // Use this to figure out when this sub-task starts
+      trial_offset = data.trial_index;
+      //console.log('OFFSET IS', trial_offset);
+    } else if (data.task == "pcon") {
+      //const d=data;
+      const trial_num = (data.trial_index - trial_offset) / 4 - 3; // Factor out when the task started, and the multi-steps per actual trial
+      //console.log('TRIAL ', data.trial_index, trial_num);
+      if (trial_num == 1) {
+        // Should get triggered on the first actual data trial
+        //console.log('FIRST TRIAL');
+        fs.appendFileSync(CSV_FILE, "Trial, CResp, Resp, Correct, RT\n");
+      }
+      if (typeof data.cresp !== "undefined") {
+        // actual data trial
+        //console.log ('DATA TRIAL', d.trial_index, (d.trial_index - trial_offset)/4-3, d.resp, d.response, trial_offset )
+        fs.appendFileSync(
+          CSV_FILE,
+          trial_num +
+            ", " +
+            data.cresp +
+            ", " +
+            data.resp +
+            ", " +
+            data.correct +
+            ", " +
+            data.rt +
+            "\n"
+        );
+      }
+    } else if (data.task == "oMSTCont") {
+      const trial_num = data.trial_index - trial_offset - 2; // pull off the offset, preload, and instruction screen
+      //console.log('OMST ', trial_offset, data.trial_index, data.correct_response, trial_num);
+      if (trial_num == 1) {
+        // Should get triggered on the first actual data trial
+        //console.log('FIRST TRIAL');
+        fs.appendFileSync(
+          CSV_FILE,
+          "Trial, CResp, Resp, Resp-raw, Correct, RT, cond, lbin, stim\n"
+        );
+      }
+      if (typeof data.correct_response !== "undefined") {
+        // actual data trial -- they may all be??
+        //console.log ('DATA TRIAL', d.trial_index, (d.trial_index - trial_offset)/4-3, d.resp, d.response, trial_offset )
+        fs.appendFileSync(
+          CSV_FILE,
+          trial_num +
+            ", " +
+            data.correct_response +
+            ", " +
+            data.resp +
+            ", " +
+            data.response +
+            ", " +
+            data.correct +
+            ", " +
+            data.rt +
+            ", " +
+            data.condition +
+            ", " +
+            data.lbin +
+            ", " +
+            data.stimulus +
+            "\n"
+        );
+      }
+      // else {
+      //   console.log('WTF',data);
+      // }
+    } else if (data.task == "end") {
+      //fs.appendFileSync(CSV_FILE,'End\n' + data.login_data + '\n');
+      console.log(data.login_data);
+    } else if (typeof data.summary !== "undefined") {
+      // final summary
+      fs.appendFileSync(CSV_FILE, "\nSummary\n");
+      fs.appendFileSync(CSV_FILE, "Perceptual control\n" + data.summary.pconsummary + "\n");
+      fs.appendFileSync(CSV_FILE, "oMST\n" + data.summary.contsummary + "\n");
+    }
   }
 
   // Create the temporary folder & file if it hasn't been created
@@ -319,110 +495,4 @@ function createWindow() {
   // Load web contents at the given URL
   log.info("Loading URL: ", appURL);
   mainWindow.loadURL(appURL);
-}
-
-/** SERIAL PORT SETUP & COMMUNICATION (EVENT MARKER) */
-
-/**
- * Checks the connection to an EEG machine via USB ports
- */
-async function setUpPort() {
-  log.info("Setting up USB port");
-  const { productID, comName, vendorID } = TRIGGER_CODES;
-
-  let maybePort;
-  if (productID) {
-    // Check port based on productID
-    log.info("Received a product ID:", productID);
-    maybePort = await getPort(vendorID, productID);
-  } else {
-    // Check port based on COM name
-    log.info("No product ID, defaulting to COM:", comName);
-    maybePort = await getPort(comName);
-  }
-
-  if (maybePort !== false) {
-    TRIGGER_PORT = maybePort;
-
-    // Show dialog box if trigger port has any errors
-    TRIGGER_PORT.on("error", (err) => {
-      log.error(err);
-
-      // Displays as a dialog if there Electron is unable to communicate with the event marker's serial port
-      // TODO @brown-ccv #400: Let this just be dialog.showErrorBox?
-      dialog
-        .showMessageBox(null, {
-          type: "error",
-          message: "There was an error with event marker's serial port.",
-          title: "USB Error",
-          buttons: [
-            "OK",
-            // Allow continuation when running in development mode
-            ...(ELECTRON_START_URL ? ["Continue Anyway"] : []),
-          ],
-          defaultId: 0,
-        })
-        .then((opt) => {
-          log.info(opt);
-          if (opt.response === 0) {
-            // Quit app when user selects "OK"
-            app.exit();
-          } else {
-            // User selected "Continue Anyway", trigger port is not connected
-            CONTINUE_ANYWAY = true;
-            TRIGGER_PORT = undefined;
-          }
-        });
-    });
-  } else {
-    // Unable to connect to a port
-    TRIGGER_PORT = undefined;
-    log.warn("USB port was not connected");
-  }
-}
-
-/**
- * Handles the sending of an event code to TRIGGER_PORT
- * @param code The code to send via USB
- */
-function handleEventSend(code) {
-  log.info(`Sending USB event ${code} to port ${TRIGGER_PORT}`);
-
-  // Early return when running in development (no trigger port is expected)
-  if (CONTINUE_ANYWAY) return;
-
-  if (TRIGGER_PORT !== undefined) {
-    sendToPort(TRIGGER_PORT, code);
-  } else {
-    log.error(`Trigger port is undefined - Event Marker is not connected`);
-
-    // Display error menu
-    const response = dialog.showMessageBoxSync(null, {
-      type: "error",
-      message: "Event Marker is not connected",
-      title: "USB Error",
-      buttons: [
-        "Quit",
-        "Retry",
-        // Allow continuation when running in development mode
-        ...(ELECTRON_START_URL ? ["Continue Anyway"] : []),
-      ],
-      detail: "heres some detail",
-    });
-
-    switch (response) {
-      case 0:
-        // User selects "Quit"
-        app.exit();
-        break;
-      case 1:
-        // User selects "Retry" so we reset the port and try again
-        setUpPort().then(() => handleEventSend(code));
-        break;
-      case 2:
-        // User selects "Continue Anyway", we must be in dev mode
-        CONTINUE_ANYWAY = true;
-        break;
-    }
-  }
 }
