@@ -1,29 +1,34 @@
 {
-  "name": "honeycomb",
-  "description": "All-in-one task starter app with jsPsych + React + Electron + psiturk ",
+  "name": "mst",
+  "description": "Desktop version of the online MST/oMST",
   "author": {
-    "name": "Brown CCV",
-    "email": "ccv-bot@brown.edu",
-    "url": "https://ccv.brown.edu"
+    "name": "Stark Lab",
+    "email": "starklab@uci.edu",
+    "url": "https://faculty.sites.uci.edu/starklab"
   },
-  "honeycombVersion": "",
-  "version": "3.3.0",
-  "repository": "https://github.com/brown-ccv/honeycomb",
+  "honeycombVersion": "3.3.0",
+  "version": "0.0.1",
+  "repository": "https://github.com/celstark/mst_honeycomb",
   "license": "MIT",
   "private": true,
   "main": "public/electron/main.js",
   "homepage": ".",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.2",
-    "@jspsych/plugin-audio-keyboard-response": "^1.1.3",
     "@jspsych/plugin-fullscreen": "^1.2.0",
     "@jspsych/plugin-html-button-response": "^1.1.1",
     "@jspsych/plugin-html-keyboard-response": "^1.1.1",
+    "@jspsych/plugin-image-button-response": "^1.1.1",
     "@jspsych/plugin-image-keyboard-response": "^1.1.2",
-    "@jspsych/plugin-initialize-camera": "^1.0.1",
     "@jspsych/plugin-instructions": "^1.1.3",
     "@jspsych/plugin-preload": "^1.1.2",
-    "@jspsych/plugin-survey": "^0.2.2",
+    "@jspsych/plugin-animation": "^1.1.2",
+    "@jspsych/plugin-categorize-image": "^1.1.1",
+    "@jspsych/plugin-survey-html-form": "^1.0.2",
+    "@jspsych/plugin-survey-multi-choice": "^1.1.1",
+    "@jspsych/plugin-survey-multi-select": "^1.1.1",
+    "@jspsych/plugin-video-button-response": "^1.1.1",
+    "@jspsych/plugin-video-keyboard-response": "^1.1.2",
     "bootstrap": "^5.2.0-beta1",
     "electron-log": "^5.0.0",
     "electron-squirrel-startup": "^1.0.0",
@@ -113,6 +118,37 @@
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
+    },
+    "forge": {
+      "packagerConfig": {
+        "asar": true,
+        "icon": "./public/MST"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {
+            "icon": "./assets/icons/mac/icon.icns"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+            "icon": "./assets/icons/mac/icon.icns",
+            "overwrite": true
+          },
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "iconUrl": "https://raw.githubusercontent.com/celstark/omst_honeycomb/oMST/public/MST.ico",
+            "setupIcon": "./public/MST.ico"
+          }
+        }
+      ]
     }
   },
   "lint-staged": {

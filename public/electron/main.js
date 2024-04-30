@@ -269,7 +269,13 @@ function handleSaveVideo(event, data) {
 function createWindow() {
   let mainWindow;
   let appURL;
-
+  const os = require("os");
+  if (os.platform() === "darwin") {
+    const nativeImage = require("electron").nativeImage;
+    const image = nativeImage.createFromPath("public/MSTLogo512.png");
+    console.log(image);
+    app.dock.setIcon(image);
+  }
   if (ELECTRON_START_URL) {
     // Running in development
 
@@ -278,7 +284,7 @@ function createWindow() {
 
     // Create a 1500x900 window with the dev tools open
     mainWindow = new BrowserWindow({
-      icon: "./favicon.ico",
+      icon: "./public/MST.ico",
       webPreferences: { preload: path.join(__dirname, "preload.js") },
       width: 1500,
       height: 900,
@@ -300,7 +306,7 @@ function createWindow() {
 
     // Create a fullscreen window with the menu bar hidden
     mainWindow = new BrowserWindow({
-      icon: "./favicon.ico",
+      icon: "./public/MST.ico",
       webPreferences: { preload: path.join(__dirname, "preload.js") },
       fullscreen: true,
       menuBarVisible: false,
