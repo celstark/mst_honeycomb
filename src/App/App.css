@@ -1,0 +1,376 @@
+/***********************************************************************
+//
+//   File: App.css                        Folder: src
+//
+//   Author: Honeycomb, Craig Stark, Audrey Hempel
+//   --------------------
+//
+//   Changes:
+//        6/15/23 (AGH): added Craig's general jspysch formatting 
+//        6/30/23 (AGH): added consent form and demogform selectors
+//        7/21/23 (AGH): added Login page selectors and formatting
+//                       made jspsych buttons larger
+//        7/27/23 (AGH): changes to login setup to space out new
+//                       language, consent, demog, pcon and instr
+//                       options
+//        7/28/28 (AGH): added toggle to login setup to format
+//                       the participant/experimenter view button
+//
+//   --------------------
+//   This file contains the general formatting for the app and some 
+//   selectors that format specific trials or pages.
+//
+/************************************************************************
+
+/*----------------------- 1 ----------------------*/
+/*-------------- GENERAL FORMATTING --------------*/
+
+html,
+body,
+#root,
+.App {
+  text-align: center;
+  margin: 0;
+  min-height: 100vh;
+  height: 100% !important;
+  width: 100vw !important;
+}
+
+.centered-h-v {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.width-50 {
+  width: 50%;
+}
+
+.width-100 {
+  width: 100%;
+}
+
+.photodiode-box {
+  position: fixed;
+  bottom: 3px;
+  right: 3px;
+  display: flex;
+  outline: 3px solid rgb(80, 80, 80);
+  margin: auto;
+  height: 50px;
+  width: 50px;
+}
+
+.photodiode-spot {
+  width: 50px;
+  height: 50px;
+  background-color: black;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.main-prompt,
+.center_container {
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center !important;
+}
+
+.main-prompt {
+  margin-top: -10%;
+  margin-bottom: -5%;
+}
+
+#fixation-dot {
+  background-color: black;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+}
+
+/*----------------------- 2 ----------------------*/
+/*-------------- JSPSYCH FORMATTING---------------*/
+
+/*
+ * CSS for jsPsych experiments.
+ *
+ * This stylesheet provides minimal styling to make jsPsych
+ * experiments look polished without any additional styles.
+ */
+
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700);
+
+/* Container holding jsPsych content */
+
+.jspsych-display-element {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.jspsych-display-element:focus {
+  outline: none;
+}
+
+.jspsych-content-wrapper {
+  display: flex;
+  margin: auto;
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+.jspsych-content {
+  max-width: 95%; /* this is mainly an IE 10-11 fix */
+  text-align: center;
+  margin: auto; /* this is for overflowing content */
+}
+
+.jspsych-top {
+  align-items: flex-start;
+}
+
+.jspsych-middle {
+  align-items: center;
+}
+
+/* fonts and type */
+ 
+.jspsych-display-element {
+  font-family: 'Open Sans', 'Arial', sans-serif;
+  font-size: 25px; /*changed from 18*/
+  line-height: 1.6em;
+}
+
+/* Form elements like input fields and buttons */
+
+.jspsych-display-element input[type='text'] {
+  font-family: 'Open Sans', 'Arial', sans-serif;
+  font-size: 14px;
+}
+
+/* borrowing Bootstrap style for btn elements, but combining styles a bit */
+.jspsych-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 30px;
+  font-weight: 400;
+  font-family: 'Open Sans', 'Arial', sans-serif;
+  cursor: pointer;
+  line-height: 1.4;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.jspsych-btn:hover {
+  background-color: #ddd;
+  border-color: #aaa;
+}
+
+.jspsych-btn:disabled {
+  background-color: #eee;
+  color: #aaa;
+  border-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* jsPsych progress bar */
+
+#jspsych-progressbar-container {
+  color: #555;
+  border-bottom: 1px solid #dedede;
+  background-color: #f9f9f9;
+  margin-bottom: 1em;
+  text-align: center;
+  padding: 8px 0px;
+  width: 100%;
+  line-height: 1em;
+}
+#jspsych-progressbar-container span {
+  font-size: 14px;
+  padding-right: 14px;
+}
+#jspsych-progressbar-outer {
+  background-color: #eee;
+  width: 50%;
+  margin: auto;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+#jspsych-progressbar-inner {
+  background-color: #aaa;
+  width: 0%;
+  height: 100%;
+}
+
+/* Control appearance of jsPsych.data.displayData() */
+#jspsych-data-display {
+  text-align: left;
+}
+
+/*----------------------- 3 ----------------------*/
+/*------------------ LOGIN PAGE ------------------*/
+
+.login-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 800px;
+}
+
+.login {
+  width: 100%;
+  margin: 10px;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.num-options-container {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+  align-items: baseline;
+  margin-top: 10px;
+}
+
+.num-options {
+  display: flex;
+  gap: 57px;
+  align-items: baseline;
+  margin-top: 20px;
+}
+
+.num-options select {
+  align-items: center;
+  width: 95px;
+}
+
+.num-options select option {
+  text-align: center;
+}
+
+.response-options-container {
+  display: flex;
+  gap: 50px;
+}
+
+.response-options {
+  display: flex;
+  gap: 50px;
+  margin-top: 10px;
+}
+
+.response-options select {
+  width: 150px;
+}
+
+.response-options select option {
+  text-align: center;
+}
+
+.checkboxes-container {
+  display: flex;
+  gap: 6px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  align-items: start;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  margin: 20px;
+}
+
+.toggle-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: transparent;
+  border-color: #ccc;
+  align-items: left;
+}
+
+/*----------------------- 4 ----------------------*/
+/*----------------- CONSENT FORM -----------------*/
+
+#consenttext {
+  font-family: 'Open Sans', 'Arial', sans-serif;
+  text-align: left;
+  font-size: 18px;
+  color: #666;
+  margin: 50px;
+  margin-bottom: 10px;
+  line-height: 1.5rem;
+}
+
+#consenttext li,
+ul {
+  font-family: 'Open Sans', 'Arial', sans-serif;
+  text-align: left;
+  font-size: 20px;
+  color: #666;
+  margin: 10px;
+}
+
+#agreeButton,
+#cancelButton {
+  color: #555;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #ccc;
+  border: solid 4px #ddd;
+  border-radius: 4px;
+  padding: 0.5em 2em;
+}
+
+
+/*----------------------- 5 ----------------------*/
+/*----------------- DEMOGRAPHICS -----------------*/
+
+#demogpramble {
+  font-size: 90%;
+}
+
+#demogform {
+  text-align: left;
+  font-size: 18px;
+  margin-top: 50px;
+  margin-left: 50px;
+  line-height: 1.5rem;
+}
+
+#demogform p {
+  text-align: left;
+  font-size: 18px;
+  line-height: 1.6em;
+}
+
+
