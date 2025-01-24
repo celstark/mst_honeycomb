@@ -183,6 +183,27 @@
     },
     "ty": "谢谢"
   },
+  "st": {
+    "instr1_study": "In this task, you will see pictures on the screen one by one. For each picture that you see, I want you to decide whether the item you see is typically an indoor item or an outdoor item. If you're not sure whether the item is an indoor item or an outdoor item, go ahead and take a guess. It's up to you.",
+    "key": {
+      "study_prompt": "Indoor (<b>v</b>) or Outdoor (<b>n</b>)?",
+      "study_choices": {
+        "indoor": "v",
+        "outdoor": "n"
+      },
+      "threechoice": "旧（<b>v</b>），相近（<b>b</b>），或新（<b>n</b>）任务",
+      "twochoice": "旧（<b>v</b>）或新（<b>n</b>）任务"
+    },
+    "button": {
+      "study_prompt": "<i>Indoor</i> or <i>Outdoor</i>?",
+      "study_choices": {
+        "indoor": "Indoor",
+        "outdoor": "Outdoor"
+      },
+      "threechoice":  "<i>旧</i>, <i>相近</i>，或<i>新</i>任务",
+      "twochoice":  "<i>旧</i>或<i>新</i>任务"
+    }
+  },
   "end": {
     "nc": "Consent not given. The experiment has ended.",
     "ty": "Thank you for your participation in the experiment. You may close this window if you are not redirected"

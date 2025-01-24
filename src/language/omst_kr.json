@@ -180,6 +180,27 @@
     },
     "ty": "감사합니다"
   },
+  "st": {
+    "instr1_study": "In this task, you will see pictures on the screen one by one. For each picture that you see, I want you to decide whether the item you see is typically an indoor item or an outdoor item. If you're not sure whether the item is an indoor item or an outdoor item, go ahead and take a guess. It's up to you.",
+    "key": {
+      "study_prompt": "Indoor (<b>v</b>) or Outdoor (<b>n</b>)?",
+      "study_choices": {
+        "indoor": "v",
+        "outdoor": "n"
+      },
+      "threechoice": "Old (<b>v</b>), Similar (<b>b</b>), or New (<b>n</b>) task",
+      "twochoice": "Old (<b>v</b>) or New (<b>n</b>) task"
+    },
+    "button": {
+      "study_prompt": "<i>Indoor</i> or <i>Outdoor</i>?",
+      "study_choices": {
+        "indoor": "Indoor",
+        "outdoor": "Outdoor"
+      },
+      "threechoice":  "<i>Old</i>, <i>Similar</i>, or <i>New</i> task",
+      "twochoice":  "<i>Old</i> or <i>New</i> task"
+    }
+  },
   "end": {
     "nc": "Consent not given. The experiment has ended.",
     "nc_trans": "연구 참여 동의를 주시지 않아서 이 스터디는 끝났습니다.",

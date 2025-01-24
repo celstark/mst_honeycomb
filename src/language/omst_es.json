@@ -181,6 +181,27 @@
     },
     "ty": "Muchas Gracias"
   },
+  "st": {
+    "instr1_study": "In this task, you will see pictures on the screen one by one. For each picture that you see, I want you to decide whether the item you see is typically an indoor item or an outdoor item. If you're not sure whether the item is an indoor item or an outdoor item, go ahead and take a guess. It's up to you.",
+    "key": {
+      "study_prompt": "Indoor (<b>v</b>) or Outdoor (<b>n</b>)?",
+      "study_choices": {
+        "indoor": "v",
+        "outdoor": "n"
+      },
+      "threechoice": "Tarea <i>Viejo</i>, <i>Similar</i>, o <i>Nuevo</i>",
+      "twochoice": "Tarea Viejo (<b>v</b>) o Nuevo (<b>n</b>)"
+    },
+    "button": {
+      "study_prompt": "<i>Indoor</i> or <i>Outdoor</i>?",
+      "study_choices": {
+        "indoor": "Indoor",
+        "outdoor": "Outdoor"
+      },
+      "threechoice":  "Tarea <i>Viejo</i>, <i>Similar</i>, o <i>Nuevo</i>",
+      "twochoice":  "Tarea <i>Viejo</i> o <i>Nuevo</i>"
+    }
+  },
   "end": {
     "nc": "No se ha prestado consentimiento. El experimento ha terminado.",
     "ty": "Gracias por su participación en el experimento. Puede cerrar esta ventana si no es redirigido"

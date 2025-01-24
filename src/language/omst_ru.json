@@ -183,6 +183,27 @@
     },
     "ty": "Спасибо"
   },
+  "st": {
+    "instr1_study": "In this task, you will see pictures on the screen one by one. For each picture that you see, I want you to decide whether the item you see is typically an indoor item or an outdoor item. If you're not sure whether the item is an indoor item or an outdoor item, go ahead and take a guess. It's up to you.",
+    "key": {
+      "study_prompt": "Indoor (<b>v</b>) or Outdoor (<b>n</b>)?",
+      "study_choices": {
+        "indoor": "v",
+        "outdoor": "n"
+      },
+      "threechoice": "Старое (<b>v</b>), Похожее (<b>b</b>), или Новое (<b>n</b>) задание",
+      "twochoice": "Старое (<b>v</b>) или Новое (<b>n</b>) задание"
+    },
+    "button": {
+      "study_prompt": "<i>Indoor</i> or <i>Outdoor</i>?",
+      "study_choices": {
+        "indoor": "Indoor",
+        "outdoor": "Outdoor"
+      },
+      "threechoice":  "<i>Старое</i>, <i>Похожее</i>, или <i>Новое</i> задание",
+      "twochoice":  "<i>Старое</i> или <i>Новое</i> задание"
+    }
+  },
   "end": {
     "nc": "Consent not given. The experiment has ended.",
     "ty": "Спасибо за ваше участие в эксперименте. Вы можете закрыть это окно если вы не переадресованы"
