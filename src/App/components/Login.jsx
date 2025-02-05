@@ -189,10 +189,10 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
     language = chooseLang;
     console.log("language = " + chooseLang);
 
-    format = chooseFormat; 
-    console.log('format = ',format,chooseFormat)
+    format = chooseFormat;
+    console.log("format = ", format, chooseFormat);
     if (format == "st64") {
-      sublist="1";
+      sublist = "1";
     }
 
     // [twochoice=#]: 0=OSN, 1=ON response choices (0=default)
@@ -228,20 +228,19 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
 
     // load trial stim from jsOrders file
     // For study-test, orderfile = study, orderfile2 = test
-    console.log('getting order ',format,stim_set,sublist)
+    console.log("getting order ", format, stim_set, sublist);
     const ofvals = loadOrder(format, stim_set, sublist);
     orderfile_msts = ofvals[0];
     trial_stim_msts = ofvals[1];
-    console.log('MSTS order ',orderfile_msts,trial_stim_msts.length)
+    console.log("MSTS order ", orderfile_msts, trial_stim_msts.length);
     mstsBlock = loadMSTSBlock(trial_stim_msts, stim_set);
 
     //orderfile_mstt = orderfile_msts.replace("_p1_", "_p2_");
     const ofvals_mstt = loadOrder(format, stim_set, sublist, 2);
     orderfile_mstt = ofvals_mstt[0];
     trial_stim_mstt = ofvals_mstt[1];
-    console.log('MSTT order ',orderfile_mstt,trial_stim_mstt.length)
+    console.log("MSTT order ", orderfile_mstt, trial_stim_mstt.length);
     msttBlock = loadMSTTBlock(trial_stim_mstt, stim_set);
-
 
     // refresh trails based on Login options
     console.log("refreshing trials");
@@ -411,7 +410,6 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
                   </div>
                 </div>
               </div>
-
 
               <div className="checkboxes-container">
                 <div className="checkbox-option">
