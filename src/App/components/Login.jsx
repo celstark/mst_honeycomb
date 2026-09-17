@@ -588,6 +588,7 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
 
 export {
   Login,
+  format,
   stim_set,
   sublist,
   resp_mode,

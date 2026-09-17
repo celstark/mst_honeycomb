@@ -37,10 +37,9 @@ const generateStartingOpts = (blockSettings, seed = null) => {
   if (blockSettings.randomize_order) {
     const flattened = _.flatten(startingOptions);
     const result = seed !== null ? seededShuffle(flattened, seed) : _.shuffle(flattened);
-    console.log(
-      "  first 3 stimuli:",
-      result.slice(0, 3).map((t) => t.stimulus)
-    );
+    console.log("Full randomized order:", result.map((t, i) =>
+      `${i + 1}: ${t.stimulus || 'no stimulus'} [${t.data?.condition || 'no condition'}]`
+    ));
     return result;
   } else {
     return _.flatten(startingOptions);
