@@ -30,6 +30,8 @@
 //        10/28/23 (CELS): Set to pre-load the oMST as well
 //        6/10/24 (CELS): Adding feedback option and cleanup
 //        1/20/25 (CELS): Reorganization by grouping trials into timelines (from add-classic)
+//        [TODAY] : Added phase_mode for study-only/test-only/complete
+//                  Added RNG seed based on participantID
 //
 //   --------------------
 //   This file builds the primaryTimeline from all of the trials.
@@ -41,10 +43,9 @@
 //----------------------- 1 ----------------------
 //-------------------- IMPORTS -------------------
 
-//import { config } from "../config/main";
-
 // Login options
 import {
+  phase_mode, // ADDED
   include_consent,
   include_demog,
   include_pcon,
@@ -83,7 +84,6 @@ import { end_message } from "../trials/end";
 
 //----------------------- 2 ----------------------
 //-------------------- OPTIONS -------------------
-// Honeycomb will combine these custom options with other options needed by Honyecomb.
 
 const jsPsychOptions = {
   on_trial_finish: (data) => console.log(`Trial ${data.internal_node_id} just finished:`, data),
@@ -92,14 +92,16 @@ const jsPsychOptions = {
 
 //----------------------- 3 ----------------------
 //-------------------- TIMELINE ------------------
-// Honeycomb will call this function for us after the subject logs in, and run the resulting timeline.
-// The instance of jsPsych passed in will include jsPsychOptions above, plus other options needed by Honeycomb.
 
-//const buildTimeline = () => (config.USE_MTURK ? mturkTimeline : buildPrimaryTimeline());
-
-//const buildPrimaryTimeline = () => {
 function buildTimeline(jsPsych, studyID, participantID) {
-  console.log(`Building timeline for participant ${participantID} on study ${studyID}`);
+  console.log("buildTimeline called with participantID:", participantID);
+
+  let seed = 0;
+  for (let i = 0; i < participantID.length; i++) {
+    seed = (seed * 31 + participantID.charCodeAt(i)) % 2147483647;
+  }
+  console.log("Computed seed:", seed);
+  console.log("mstsBlock.randomize_order:", mstsBlock.randomize_order);
 
   const primaryTimeline = [];
 
@@ -109,7 +111,6 @@ function buildTimeline(jsPsych, studyID, participantID) {
     conditional_function: function () {
       return include_consent;
     },
-    // if this is the first included trial, add login options to data here
     data: { login_data: consent_login_data },
   };
 
@@ -119,7 +120,6 @@ function buildTimeline(jsPsych, studyID, participantID) {
     conditional_function: function () {
       return include_demog;
     },
-    // if this is the first included trial, add login options to data here
     data: { login_data: demog_login_data },
   };
 
@@ -133,7 +133,6 @@ function buildTimeline(jsPsych, studyID, participantID) {
     conditional_function: function () {
       return include_pcon;
     },
-    // if this is the first included trial, add login options to data here
     data: { login_data: pcon_login_data },
   };
 
@@ -143,7 +142,6 @@ function buildTimeline(jsPsych, studyID, participantID) {
     conditional_function: function () {
       return include_instr;
     },
-    // if this is the first included trial, add login options to data here
     data: { login_data: instr_login_data },
   };
 
@@ -151,13 +149,33 @@ function buildTimeline(jsPsych, studyID, participantID) {
   const incl_feedback = (jsPsych) => ({
     timeline: [mstt_feedback(jsPsych)],
     conditional_function: function () {
-      if (include_feedback) {
-        return true;
-      } else {
-        return false;
-      }
+      return include_feedback;
     },
   });
+
+  // conditional timeline for study phase (MSTS)
+  // runs if phase_mode is "complete" or "study-only"
+  const optTL_msts = {
+    timeline: [msts_preload, setupMstsBlock(mstsBlock, seed)],
+    conditional_function: function () {
+      return phase_mode === "complete" || phase_mode === "study-only";
+    },
+  };
+
+  // conditional timeline for test phase (MSTT)
+  // runs if phase_mode is "complete" or "test-only"
+  const optTL_mstt = {
+    timeline: [
+      mstt_preload,
+      mstt_instr_trial,
+      setupMsttBlock(msttBlock, jsPsych, seed),
+      incl_feedback(jsPsych),
+      mstt_debrief_block,
+    ],
+    conditional_function: function () {
+      return phase_mode === "complete" || phase_mode === "test-only";
+    },
+  };
 
   // conditional timeline that runs the experiment if consent is given
   var consented = {
@@ -165,20 +183,11 @@ function buildTimeline(jsPsych, studyID, participantID) {
       optTL_demog, // demographics form
       optTL_pcon, // perceptual control task
       optTL_instr, // instructions
-
-      msts_preload,
-      setupMstsBlock(mstsBlock, jsPsych),
-      mstt_preload,
-      mstt_instr_trial, // instructions
-      setupMsttBlock(msttBlock, jsPsych), // looping trials
-      incl_feedback(jsPsych),
-      mstt_debrief_block, // thank you
-
+      optTL_msts, // study phase (conditional)
+      optTL_mstt, // test phase (conditional)
       end_message, // final thank you message
     ],
     conditional_function: function () {
-      // if consent was given in consent trial or consent form not included,
-      // run above timeline
       return consentGiven || !include_consent;
     },
     data: { login_data: cont_login_data },
@@ -192,7 +201,6 @@ function buildTimeline(jsPsych, studyID, participantID) {
     },
   };
 
-  // push conditional consent and notconsented timelines to primary timeline
   primaryTimeline.push(optTL_consent, consented, notConsented);
   return primaryTimeline;
 }
@@ -200,5 +208,4 @@ function buildTimeline(jsPsych, studyID, participantID) {
 //----------------------- 4 ----------------------
 //-------------------- EXPORTS -------------------
 
-// include these options, get the timeline from this function.
 export { jsPsychOptions, buildTimeline };

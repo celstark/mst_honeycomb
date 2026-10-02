@@ -124,8 +124,18 @@ function createWindow() {
       },
     });
 
+    mainWindow.webContents.session.setPermissionRequestHandler(
+      (webContents, permission, callback) => {
+        if (permission === "media") {
+          // Only allow media if VIDEO mode is explicitly enabled
+          callback(VIDEO);
+        } else {
+          callback(true);
+        }
+      }
+    );
+
     mainWindow.on("closed", function () {
-      //7/24/23 (AGH) ADDED
       saveDataAndQuit();
       mainWindow = null;
     });
@@ -142,11 +152,7 @@ function createWindow() {
 
   // Emitted when the window is closed.
   mainWindow.on("closed", function () {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    //console.log('on closed');
-    saveDataAndQuit(); // 7/10/23 (AGH) ADDED
+    saveDataAndQuit();
     mainWindow = null;
   });
 }
@@ -376,7 +382,6 @@ ipc.on("data", (event, args) => {
             "\n"
         );
       }
-
     } else if (args.task == "end") {
       //stream_csv.write('End\n' + args.login_data + '\n');
       console.log(args.login_data);
