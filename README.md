@@ -12,7 +12,7 @@ This is pre-release code.  Translations are incomplete (study-test aspects are i
 If you're not a developer, download the appropriate `.dmg` or `.exe` from the Release page. (_Note, currently, the "universal" `.dmg` is actually only Apple Silicon / ARM specific.). These currently are not signed, so Windows Defender will likely complain.  The first time its run on Windows, it's unpacking a bit, but nothing gets "installed", at least not system-wide.  It does a local-user install into your AppData folder.  On Macs, as it's not signed yet, double-clicking on the app icon will likely lead to macOS preventing it from running.  Right-click (2 finger tap on the trackpad) and select Open (and yes, this is different than double-clicking) and it should run and not need this in the future. Feel free to drag to the Applications folder if you like as well.
 
 ## Task parameters and setup
-The main screen that appears lets you enter in a study-ID and a participant-ID. These are used to save the data (to your desktop). When you type in the study-ID, any other parameters will be automatically restored from any prior runs with that same study-ID, so it's a good idea to set this first.
+The main screen that appears lets you enter in a study-ID and a participant-ID. These are used to save the data (to your desktop). When you type in the study-ID, any other parameters will be automatically restored from any prior runs with that same study-ID, so it's a good idea to set this first. The participant-ID is used to seed the randomization in the task so any trial with the same participant-ID and options will have the same ordering every time.
 
 You'll notice a faint box in the upper-left of the screen that, when you mouse-over says "Experimenter view". Clicking on this reveals a new set of parameters. There you can set parameters and enable or disable each of the optional phases:
 
@@ -39,7 +39,7 @@ Data are saved in both a `.json` and a `.csv` file. The `.json` is a jsPsych dat
 
 # Credits
 ## People
-Mad props go to [Audrey Hempel](https://github.com/audrey-hemp/omst_honeycomb), who wrote the first version of the stand-alone task rather than having a relaxing summer break. That was the real heavy lift. After that, [Craig Stark](https://github.com/celstark) created this fork for further development of the project.
+Mad props go to [Audrey Hempel](https://github.com/audrey-hemp/omst_honeycomb), who wrote the first version of the stand-alone task rather than having a relaxing summer break. That was the real heavy lift. After that, [Craig Stark](https://github.com/celstark) created this fork for further development of the project. Most recently, [Gavin Stark](https://github.com/GavinStark87) has contributed updates to the project.
 
 ## Tools
 There are several technologies that make this work. At its core, this is an [Electron](https://www.electronjs.org/) application. Electron is a tool that essentially bundles a web browser and your JavaScript code into a single desktop application. Here, we took the [oMST](https://github.com/celstark/oMST) that typically runs in a web browser (via [JATOS](https://www.jatos.org/) and [jsPsych](https://www.jspsych.org/)) as the basis and ported it into [Honeycomb](https://github.com/brown-ccv/honeycomb), a purpose-built template for this kind of thing (see below). We're using this here for stand-alone apps, but Honeycomb incorporates with things like PsiTurk and Firebase if you're into that sort of thing.
