@@ -108,9 +108,9 @@ const msttTrial = (tlv) => {
 
 // testBlock
 
-const setupMsttBlock = (blockSettings, jsPsych) => {
+const setupMsttBlock = (blockSettings, jsPsych, seed = null) => {
   // initialize block with starting options that set up looped trials
-  const startingOpts = generateStartingOpts(blockSettings);
+  const startingOpts = generateStartingOpts(blockSettings, seed);
 
   // const blockDetails = {
   //   block_earnings: 0.0,

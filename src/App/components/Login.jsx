@@ -67,6 +67,7 @@ var start_date;
 var stim_set = "1";
 var sublist = "1";
 var twochoice;
+var phase_mode = "complete";
 var selfpaced;
 var orderfile_msts = "./jsOrders/MST_64_s1_p1_o1";
 var orderfile_mstt = ""; // Used in test phase of study-test
@@ -106,6 +107,7 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
   const [chooseFormat, setFormat] = useState("st64");
   const [chooseLang, setLang] = useState("English");
   const [chooseTwochoice, setTwochoice] = useState(false);
+  const [choosePhase, setPhase] = useState("complete");
   const [chooseSelfpaced, setSelfpaced] = useState(false);
   const [includeConsent, setConsent] = useState(false);
   const [includeDemog, setDemog] = useState(false);
@@ -125,6 +127,7 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
     const storedFormat = localStorage.getItem(`${studyId}_format`);
     const storedLang = localStorage.getItem(`${studyId}_lang`);
     const storedTwochoice = localStorage.getItem(`${studyId}_twochoice`);
+    const storedPhase = localStorage.getItem(`${studyId}_phase`);
     const storedSelfpaced = localStorage.getItem(`${studyId}_selfpaced`);
     const storedConsent = localStorage.getItem(`${studyId}_consent`);
     const storedDemog = localStorage.getItem(`${studyId}_demog`);
@@ -139,6 +142,7 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
     setFormat(storedFormat || "st64");
     setLang(storedLang || "English");
     setTwochoice(storedTwochoice == "true");
+    setPhase(storedPhase || "complete");
     setSelfpaced(storedSelfpaced == "true");
     setConsent(storedConsent == "true");
     setDemog(storedDemog == "true");
@@ -203,6 +207,10 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
     }
     console.log("twochoice =" + twochoice);
 
+    // [phase_mode='']: complete, study, test (default = complete)
+    phase_mode = choosePhase;
+    console.log("phase_mode = " + choosePhase);
+
     // [selfpaced=#]: Should we allow infinite time with blank screen to make the response? (default =1)
     if (chooseSelfpaced === true) {
       selfpaced = 1;
@@ -256,6 +264,7 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
     localStorage.setItem(`${studyId}_format`, chooseFormat);
     localStorage.setItem(`${studyId}_lang`, chooseLang);
     localStorage.setItem(`${studyId}_twochoice`, chooseTwochoice);
+    localStorage.setItem(`${studyId}_phase`, choosePhase);
     localStorage.setItem(`${studyId}_selfpaced`, chooseSelfpaced);
     localStorage.setItem(`${studyId}_consent`, includeConsent);
     localStorage.setItem(`${studyId}_demog`, includeDemog);
@@ -277,6 +286,7 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
       include_instr: include_instr,
       include_feedback: include_feedback,
       twochoice: twochoice,
+      phase_mode: phase_mode,
       selfpaced: selfpaced,
     };
 
@@ -462,6 +472,20 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
                     />
                   </Form.Group>
                 </div>
+                <div className="response-options">
+                  <Form.Group controlId="phase">
+                    <Form.Label>Phase:</Form.Label>
+                    <Form.Control
+                      as="select"
+                      value={choosePhase}
+                      onChange={(e) => setPhase(e.target.value)}
+                    >
+                      <option value="complete">Complete</option>
+                      <option value="study-only">Study Only</option>
+                      <option value="test-only">Test Only</option>
+                    </Form.Control>
+                  </Form.Group>
+                </div>
                 <div className="checkbox-option">
                   <Form.Group controlId="selfpaced">
                     <Form.Check
@@ -564,6 +588,7 @@ function Login({ handleLogin, initialParticipantID, initialStudyID, validationFu
 
 export {
   Login,
+  format,
   stim_set,
   sublist,
   resp_mode,
@@ -575,6 +600,7 @@ export {
   include_instr,
   include_feedback,
   twochoice,
+  phase_mode,
   selfpaced,
   orderfile_msts,
   orderfile_mstt,

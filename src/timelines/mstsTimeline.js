@@ -92,11 +92,11 @@ const mstsTrial = (blockSettings, blockDetails, tlv) => {
   }
 };
 
-const setupMstsBlock = (blockSettings) => {
+const setupMstsBlock = (blockSettings, seed = null) => {
   // TODO: Can I eliminate this in the end?
   // initialize block with starting options that set up looped trials
   // This next line was doing the shuffling - make sure your blockSettings.randomizer_order is false
-  const startingOpts = generateStartingOpts(blockSettings);
+  const startingOpts = generateStartingOpts(blockSettings, seed);
   const blockDetails = {
     foo: false, // TODO: Not really sure what I want in here
   };
